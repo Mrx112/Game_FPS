@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operasi Garuda — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="radar-wrap"><canvas id="minimap" width="200" height="200"></canvas><div class="radar-n">U</div></div>
+  <div id="wave-info"><div id="wave-label">GELOMBANG 1</div><div id="enemy-left">MUSUH TERSISA: 0</div></div>
+  <div id="score-box"><div>SKOR <b id="score">0</b></div><div>ELIMINASI <b id="kills">0</b></div></div>
+  <div id="killfeed"></div>
+  <div id="markers"></div>
+  <div id="crosshair"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i></div>
+  <div id="scope"><div class="lens"></div><i class="h"></i><i class="v"></i><i class="post l"></i><i class="post r"></i><i class="post b"></i><i class="c"></i></div>
+  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+  <div id="dmg-indicators"></div>
+  <div id="vitals">
+    <div class="label">KESEHATAN</div>
+    <div class="bar"><div id="hp-fill"></div></div>
+    <div id="hp-num">100</div>
+  </div>
+  <div id="stance-ind">BERDIRI</div>
+  <div id="weapon-box">
+    <div id="weapon-name">SENAPAN SERBU</div>
+    <div class="ammo"><span id="ammo-mag">30</span><span id="ammo-res">/ 180</span></div>
+    <div id="grenades">GRANAT × 3</div>
+  </div>
+  <div id="reload-hint"></div>
+  <div id="cover-hint"></div>
+  <div id="pickup-msg"></div>
+  <div id="radio-msg"></div>
+  <div id="center-msg"><div class="big"></div><div class="small"></div></div>
+  <div id="scoreboard" class="hidden"></div>
+  <div id="story" class="hidden">
+    <div class="bar top"></div><div class="bar bottom"></div>
+    <div class="story-box">
+      <div id="story-speaker"></div>
+      <div id="story-text"></div>
+      <div class="story-next">[SPASI] / KLIK UNTUK LANJUT</div>
+    </div>
+  </div>
+</div>
+<div id="vignette"></div>
+<div id="dmg-flash"></div>
+<div id="barks"></div>
+
+<!-- FILM (adegan sinematik) -->
+<div id="cinema" class="hidden">
+  <div class="cbar top"></div><div class="cbar bottom"></div>
+  <div id="cine-grain"></div><div id="cine-scratch"></div><div id="cine-vig"></div>
+  <div id="cine-title"><div id="cine-t-small"></div><div id="cine-t-big"></div><div id="cine-t-sub"></div></div>
+  <div id="cine-sub"><b id="cine-who"></b><span id="cine-text"></span></div>
+  <div id="cine-skip"><i></i>TAHAN [SPASI] LEWATI FILM · [ENTER]/KLIK ADEGAN BERIKUTNYA</div>
+  <div id="cine-fade"></div>
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="screen">
+  <div class="title">OPERASI GARUDA</div>
+  <div class="loadbar"><div id="load-fill"></div></div>
+  <div id="load-text">Memuat aset tempur… 0%</div>
+</div>
+
+<!-- MENU UTAMA -->
+<div id="menu" class="screen hidden">
+  <div class="menu-panel">
+    <div class="title">OPERASI GARUDA</div>
+    <div class="subtitle">Kampanye sinematik Perang Kemerdekaan 1945 · Bertahan, Deathmatch, Battle Royale, dan Skenario cerita buatanmu sendiri</div>
+    <a class="btn ghost" href="../" style="display:block;text-align:center;text-decoration:none">← HALAMAN DEMO</a>
+    <button id="btn-campaign" class="btn primary">KAMPANYE 1945</button>
+    <button id="btn-play" class="btn">MAIN (MODE LAIN)</button>
+    <button id="btn-mp" class="btn">MULTIPLAYER (LAN / ONLINE)</button>
+    <button id="btn-editor" class="btn">EDITOR SKENARIO</button>
+    <div class="settings">
+      <label>Nama prajurit <input id="set-name" type="text" maxlength="16" value="Garuda"></label>
+      <label>Karakter
+        <select id="set-model"><option value="0">Tentara (loreng)</option><option value="1">Pejuang Rakyat (jaket)</option></select>
+      </label>
+      <label>Sensitivitas mouse <input id="set-sens" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+      <label>Sudut pandang (FOV) <input id="set-fov" type="range" min="60" max="95" step="1" value="70"></label>
+      <label>Volume <input id="set-vol" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+      <label class="chk">Suara narasi & dialog film <input id="set-voice" type="checkbox" checked></label>
+      <label>Grafis
+        <select id="set-quality"><option value="high">Tinggi (bayangan)</option><option value="low">Rendah (lebih cepat)</option></select>
+      </label>
+    </div>
+    <div class="controls">
+      <div><kbd>W A S D</kbd> Bergerak</div>
+      <div><kbd>Shift</kbd> Lari cepat</div>
+      <div><kbd>Spasi</kbd> Lompat / bangun</div>
+      <div><kbd>C</kbd> Jongkok</div>
+      <div><kbd>Z</kbd> Tiarap</div>
+      <div><kbd>E</kbd> Berlindung di objek (agak jauh: meluncur)</div>
+      <div><kbd>A / D</kbd> Saat berlindung: bergeser &amp; menghadap kiri/kanan</div>
+      <div><kbd>V</kbd> Lompat harimau (dodge)</div>
+      <div><kbd>Klik Kiri</kbd> Tembak (di balik pelindung rendah: tembak buta)</div>
+      <div><kbd>Klik Kanan</kbd> Tahan: zoom bidik · Ketuk: teropong</div>
+      <div><kbd>R</kbd> Isi ulang</div>
+      <div><kbd>G</kbd> Lempar granat</div>
+      <div><kbd>Q</kbd> Ganti bahu kamera</div>
+      <div><kbd>F</kbd> Orang pertama / orang ketiga</div>
+      <div><kbd>1 / 2</kbd> Senapan / pistol (atau roda mouse)</div>
+      <div><kbd>Tab</kbd> Papan skor</div>
+      <div><kbd>Esc</kbd> Jeda</div>
+    </div>
+  </div>
+</div>
+
+<!-- PILIH MODE & PETA -->
+<div id="setup" class="screen hidden">
+  <div class="wide-panel">
+    <div class="panel-head"><div class="title small-title">PILIH OPERASI</div><button class="btn ghost back">KEMBALI</button></div>
+    <div class="section-label">MODE</div>
+    <div id="mode-cards" class="cards"></div>
+    <div id="scenario-pick" class="hidden">
+      <div class="section-label">SKENARIO</div>
+      <div id="scenario-list" class="list"></div>
+    </div>
+    <div id="map-pick">
+      <div class="section-label">PETA</div>
+      <div id="map-cards" class="cards"></div>
+    </div>
+    <div class="row-opts">
+      <label id="opt-time-wrap">Waktu <select id="opt-time"></select></label>
+      <label id="opt-bots-wrap">Jumlah bot <input id="opt-bots" type="range" min="1" max="23" value="9"><b id="opt-bots-val">9</b></label>
+      <label id="opt-diff-wrap">Kesulitan <select id="opt-diff"><option value="mudah">Mudah</option><option value="normal" selected>Normal</option><option value="sulit">Sulit</option><option value="veteran">Veteran</option></select></label>
+    </div>
+    <div class="setup-foot">
+      <div id="setup-desc" class="desc"></div>
+      <button id="btn-start" class="btn primary">MULAI MISI</button>
+    </div>
+  </div>
+</div>
+
+<!-- KAMPANYE -->
+<div id="campaign" class="screen hidden">
+  <div class="wide-panel camp-panel">
+    <div class="panel-head"><div class="title small-title">MERDEKA ATAU MATI</div><button class="btn ghost back">KEMBALI</button></div>
+    <div class="camp-intro">Kampanye sinematik Perang Kemerdekaan Indonesia 1945–1949. Tokoh utama fiktif, peristiwa dan tempat berdasarkan sejarah — disederhanakan untuk permainan.</div>
+    <div id="camp-list"></div>
+    <div class="row-opts"><label>Kesulitan <select id="camp-diff"><option value="mudah">Mudah</option><option value="normal" selected>Normal</option><option value="sulit">Sulit</option><option value="veteran">Veteran</option></select></label></div>
+  </div>
+</div>
+
+<!-- EDITOR SKENARIO -->
+<div id="editor" class="screen hidden">
+  <div class="wide-panel editor-panel">
+    <div class="panel-head"><div class="title small-title">EDITOR SKENARIO</div><button class="btn ghost back">KEMBALI</button></div>
+    <div class="editor-grid">
+      <div class="ed-side">
+        <div class="section-label">DAFTAR SKENARIO</div>
+        <div id="ed-list" class="list"></div>
+        <div class="ed-actions">
+          <button id="ed-new" class="btn small">+ BARU</button>
+          <button id="ed-dup" class="btn small">DUPLIKAT</button>
+          <button id="ed-del" class="btn small">HAPUS</button>
+          <button id="ed-import" class="btn small">IMPOR</button>
+          <button id="ed-export" class="btn small">EKSPOR</button>
+          <input id="ed-file" type="file" accept=".json,application/json" class="hidden">
+        </div>
+      </div>
+      <div class="ed-main" id="ed-main"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MULTIPLAYER -->
+<div id="mp" class="screen hidden">
+  <div class="wide-panel mp-panel">
+    <div class="panel-head"><div class="title small-title">MULTIPLAYER</div><button class="btn ghost back">KEMBALI</button></div>
+    <div id="mp-body"></div>
+  </div>
+</div>
+
+<!-- JEDA -->
+<div id="pause" class="screen hidden">
+  <div class="menu-panel small">
+    <div class="title">JEDA</div>
+    <button id="btn-resume" class="btn primary">LANJUTKAN</button>
+    <button id="btn-quit" class="btn">KEMBALI KE MENU</button>
+  </div>
+</div>
+
+<!-- HASIL -->
+<div id="gameover" class="screen hidden">
+  <div class="menu-panel small">
+    <div id="go-title" class="title red">GUGUR DALAM TUGAS</div>
+    <div id="go-sub" class="go-sub"></div>
+    <div id="go-stats" class="stats"></div>
+    <button id="btn-retry" class="btn primary">MAIN LAGI</button>
+    <button id="btn-menu" class="btn">MENU UTAMA</button>
+  </div>
+</div>
+
+<script>window.GARUDA_DEMO = true;</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

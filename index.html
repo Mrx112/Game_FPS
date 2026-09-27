@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merdeka atau Mati — Operasi Garuda</title>
+<meta name="description" content="Game tembak sinematik Perang Kemerdekaan Indonesia 1945–1949 yang berjalan langsung di browser. Portofolio & demo yang bisa dimainkan.">
+<meta property="og:title" content="Merdeka atau Mati — Operasi Garuda">
+<meta property="og:description" content="Game tembak sinematik Perang Kemerdekaan Indonesia 1945–1949, langsung di browser.">
+<meta property="og:image" content="media/shots/yamato.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='32' fill='%23d4201c'/><rect y='32' width='64' height='32' fill='%23f4f4f0'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0a; --panel: #17150f; --panel2: #1f1c14; --line: rgba(232, 214, 170, .16);
+    --text: #ece4d0; --muted: #b3a88e; --accent: #e8c15a; --red: #c8261e; --ok: #9fe07a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 500 18px/1.55 'Rajdhani', system-ui, sans-serif; overflow-x: hidden; }
+  a { color: var(--accent); }
+  img, video { max-width: 100%; display: block; }
+  .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+  h1, h2, h3 { font-family: 'Special Elite', 'Courier New', monospace; font-weight: 400; margin: 0; }
+  h2 { font-size: clamp(30px, 4.4vw, 46px); color: #fff; letter-spacing: 1px; }
+  .kicker { font: 700 13px 'Rajdhani', sans-serif; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+  .lead { color: var(--muted); font-size: 19px; max-width: 760px; margin: 14px 0 0; }
+  section { padding: 84px 0; border-top: 1px solid var(--line); }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; font: 700 17px 'Rajdhani', sans-serif; letter-spacing: 3px; text-decoration: none; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,.3); color: #fff; background: rgba(255,255,255,.06); clip-path: polygon(0 0, 100% 0, 100% 72%, 94% 100%, 0 100%); transition: background .2s, transform .2s; }
+  .btn:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+  .btn.primary { background: var(--accent); color: #1a1406; border-color: var(--accent); }
+  .btn.primary:hover { background: #f3d173; }
+  /* ---------- nav */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: linear-gradient(rgba(10,9,7,.92), rgba(10,9,7,0)); }
+  nav .wrap { display: flex; align-items: center; gap: 22px; height: 64px; }
+  nav .logo { font: 22px 'Black Ops One', Impact, sans-serif; letter-spacing: 2px; color: var(--accent); text-decoration: none; margin-right: auto; }
+  nav a.l { color: var(--text); text-decoration: none; font-weight: 600; letter-spacing: 1px; font-size: 16px; opacity: .85; }
+  nav a.l:hover { opacity: 1; color: var(--accent); }
+  nav .btn { padding: 8px 16px; font-size: 14px; }
+  nav .btn { white-space: nowrap; }
+  @media (max-width: 860px) { nav a.l { display: none; } nav .logo { font-size: 18px; } }
+  /* ---------- hero */
+  .hero { position: relative; min-height: 100vh; display: flex; align-items: flex-end; padding: 120px 0 70px; overflow: hidden; }
+  .hero video, .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) contrast(1.05); }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg) 2%, rgba(14,13,10,.55) 45%, rgba(14,13,10,.35)), radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.6)); }
+  .hero .wrap { position: relative; z-index: 2; }
+  .hero .over { font: 15px 'Special Elite', monospace; letter-spacing: 6px; color: #e8dcc0; }
+  .hero h1 { font-size: clamp(48px, 9vw, 116px); line-height: .95; color: #fff; margin: 10px 0 8px; text-shadow: 0 4px 30px rgba(0,0,0,.7); }
+  .hero .sub { font-size: clamp(18px, 2.2vw, 23px); max-width: 780px; color: #e6dcc4; }
+  .hero .cta { display: flex; flex-wrap: wrap; gap: 14px; margin: 28px 0 22px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 4px 12px; border: 1px solid var(--line); background: rgba(0,0,0,.35); font-size: 14px; font-weight: 700; letter-spacing: 1px; color: #d8cdb2; }
+  .flag { display: inline-block; width: 30px; height: 20px; vertical-align: middle; margin-right: 8px; background: linear-gradient(#d4201c 50%, #f4f4f0 50%); box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+  /* ---------- stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 40px; }
+  .stat { background: var(--panel); padding: 20px 18px; }
+  .stat b { display: block; font: 40px 'Black Ops One', sans-serif; color: var(--accent); line-height: 1; }
+  .stat span { color: var(--muted); font-weight: 600; letter-spacing: 1px; }
+  /* ---------- two col */
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .frame { border: 1px solid var(--line); background: #000; position: relative; }
+  .frame video, .frame img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  ul.tick { list-style: none; padding: 0; margin: 18px 0 0; }
+  ul.tick li { padding: 7px 0 7px 30px; position: relative; border-bottom: 1px dashed var(--line); }
+  ul.tick li::before { content: '✦'; position: absolute; left: 4px; color: var(--accent); }
+  /* ---------- clips */
+  .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 34px; }
+  .clip { background: var(--panel); border: 1px solid var(--line); }
+  .clip .frame { border: 0; cursor: pointer; }
+  .clip .frame::after { content: '▶'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(0,0,0,.55); border: 2px solid rgba(255,255,255,.8); color: #fff; font-size: 24px; padding-left: 4px; transition: opacity .2s; pointer-events: none; }
+  .clip .frame.playing::after { opacity: 0; }
+  .clip .cap { padding: 14px 16px 16px; }
+  .clip .cap h3 { font-size: 21px; color: #fff; }
+  .clip .cap p { margin: 6px 0 0; color: var(--muted); font-size: 16px; line-height: 1.4; }
+  .tag { display: inline-block; font: 700 11px 'Rajdhani', sans-serif; letter-spacing: 2px; padding: 2px 8px; margin-bottom: 8px; background: rgba(232,193,90,.14); color: var(--accent); border: 1px solid rgba(232,193,90,.35); }
+  .tag.game { background: rgba(159,224,122,.1); color: var(--ok); border-color: rgba(159,224,122,.35); }
+  /* ---------- chapters */
+  .chapters { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 34px; }
+  .chapter { background: var(--panel); border: 1px solid var(--line); overflow: hidden; display: flex; flex-direction: column; }
+  .chapter img { aspect-ratio: 16 / 9; object-fit: cover; filter: sepia(.2); }
+  .chapter .in { padding: 18px 20px 22px; flex: 1; }
+  .chapter .no { font: 13px 'Special Elite', monospace; letter-spacing: 3px; color: #d8c8a0; }
+  .chapter h3 { font-size: 27px; color: #fff; margin: 4px 0; }
+  .chapter .when { color: var(--accent); font-weight: 700; font-size: 15px; }
+  .chapter p { color: #cfc6b4; font-size: 16px; margin: 10px 0 0; }
+  .chapter ol { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 15px; }
+  .badge { float: right; font: 700 11px 'Rajdhani'; letter-spacing: 2px; padding: 3px 8px; border: 1px solid; }
+  .badge.on { color: var(--ok); border-color: rgba(159,224,122,.5); }
+  .badge.off { color: var(--muted); border-color: var(--line); }
+  /* ---------- features */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 34px; }
+  .card { background: var(--panel); border: 1px solid var(--line); padding: 22px; }
+  .card .ic { font-size: 28px; }
+  .card h3 { font-size: 21px; color: #fff; margin: 8px 0 6px; }
+  .card p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.45; }
+  /* ---------- gallery */
+  .gallery { columns: 3 320px; column-gap: 14px; margin-top: 34px; }
+  .gallery figure { margin: 0 0 14px; break-inside: avoid; border: 1px solid var(--line); background: var(--panel); cursor: zoom-in; }
+  .gallery figcaption { padding: 8px 12px; font-size: 15px; color: var(--muted); }
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.92); display: none; place-items: center; z-index: 50; padding: 16px; cursor: zoom-out; }
+  .lightbox.on { display: grid; }
+  .lightbox img { max-height: 90vh; border: 1px solid var(--line); }
+  /* ---------- tech */
+  .arch { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 30px; }
+  .arch div { background: var(--panel2); padding: 18px; }
+  .arch b { color: #fff; font-size: 17px; letter-spacing: .5px; }
+  .arch small { display: block; color: var(--muted); font-size: 15px; margin-top: 4px; line-height: 1.4; }
+  /* ---------- controls */
+  table.keys { width: 100%; border-collapse: collapse; margin-top: 26px; }
+  table.keys td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.keys td:first-child { width: 42%; }
+  kbd { display: inline-block; padding: 2px 8px; margin: 1px 2px; border: 1px solid rgba(255,255,255,.3); border-bottom-width: 3px; background: #222018; font: 700 14px 'Rajdhani'; color: #fff; }
+  .note { margin-top: 26px; padding: 16px 18px; border-left: 3px solid var(--accent); background: var(--panel); color: var(--muted); font-size: 16px; }
+  /* ---------- final cta */
+  .final { text-align: center; padding: 110px 0; background: radial-gradient(ellipse at center, rgba(200,38,30,.18), transparent 65%); }
+  .final h2 { font-size: clamp(36px, 6vw, 72px); }
+  .final .cta { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+  footer { border-top: 1px solid var(--line); padding: 30px 0 40px; color: var(--muted); font-size: 15px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 30px; justify-content: space-between; }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s, transform .8s; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="logo" href="#top">OPERASI GARUDA</a>
+  <a class="l" href="#tentang">Tentang</a>
+  <a class="l" href="#cuplikan">Cuplikan</a>
+  <a class="l" href="#cerita">Cerita</a>
+  <a class="l" href="#fitur">Fitur</a>
+  <a class="l" href="#teknologi">Teknologi</a>
+  <a class="btn primary" href="play/">▶ Mainkan</a>
+</div></nav>
+
+<!-- ============================================================ HERO -->
+<header class="hero" id="top">
+  <img class="poster" src="media/posters/trailer.jpg" alt="">
+  <video autoplay muted loop playsinline preload="metadata" poster="media/posters/trailer.jpg" aria-label="Trailer permainan">
+    <source src="media/clips/trailer.mp4" type="video/mp4">
+  </video>
+  <div class="wrap">
+    <div class="over"><span class="flag"></span>OPERASI GARUDA · KAMPANYE 1945</div>
+    <h1>MERDEKA<br>ATAU MATI</h1>
+    <p class="sub">Game tembak orang ketiga yang bercerita seperti film tentang Perang Kemerdekaan Indonesia 1945–1949. Berjalan langsung di browser, tanpa instalasi.</p>
+    <div class="cta">
+      <a class="btn primary" href="play/">▶ Mainkan Demo</a>
+      <a class="btn" href="#cuplikan">Tonton Cuplikan</a>
+      <a class="btn" href="#tentang">Baca Penjelasan</a>
+    </div>
+    <div class="chips">
+      <span class="chip">WebGL · three.js</span><span class="chip">Adegan film di dalam mesin game</span><span class="chip">Bahasa Indonesia</span>
+      <span class="chip">Komputer + keyboard & mouse</span><span class="chip">±14 MB</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================ TENTANG -->
+<section id="tentang"><div class="wrap">
+  <div class="cols reveal">
+    <div>
+      <div class="kicker">Tentang proyek</div>
+      <h2>Film yang bisa dimainkan</h2>
+      <p class="lead">Merdeka atau Mati adalah kampanye cerita dalam <b>Operasi Garuda</b>, game tembak orang ketiga berbasis browser. Pemain menjadi seorang pemuda Surabaya, lalu prajurit TKR dan TNI, yang ikut mengalami peristiwa-peristiwa besar revolusi — dari robeknya bendera di Hotel Yamato sampai perang gerilya Jenderal Soedirman.</p>
+      <ul class="tick">
+        <li><b>Adegan film di dalam mesin game</b> — kamera sinematik, kartu judul, subtitle, dan narasi suara di antara misi.</li>
+        <li><b>Rakyat ikut dalam cerita</b> — warga berjalan, mengobrol, panik saat ditembaki, dan bisa diselamatkan.</li>
+        <li><b>Seragam & senjata zamannya</b> — pejuang berikat kepala merah putih, TKR, tentara Sekutu berhelm Brodie; Arisaka, Lee-Enfield, Sten, bambu runcing.</li>
+        <li><b>Tempat bersejarah</b> — Surabaya 1945 (Hotel Yamato, Jembatan Merah, Kalimas) dan Ambarawa (Benteng Willem I, stasiun kereta uap).</li>
+      </ul>
+    </div>
+    <div class="frame"><video src="media/clips/yamato.mp4" poster="media/posters/yamato.jpg" autoplay muted loop playsinline preload="none" aria-label="Adegan Hotel Yamato"></video></div>
+  </div>
+  <div class="stats reveal">
+    <div class="stat"><b>3</b><span>bab kampanye</span></div>
+    <div class="stat"><b>10</b><span>film cerita</span></div>
+    <div class="stat"><b>6</b><span>peta besar</span></div>
+    <div class="stat"><b>5</b><span>mode permainan</span></div>
+    <div class="stat"><b>10+</b><span>faksi & tokoh berkostum</span></div>
+    <div class="stat"><b>0</b><span>file audio — semua disintesis</span></div>
+  </div>
+</div></section>
+
+<!-- ============================================================ CUPLIKAN -->
+<section id="cuplikan"><div class="wrap">
+  <div class="reveal">
+    <div class="kicker">Cuplikan</div>
+    <h2>Adegan film & gameplay</h2>
+    <p class="lead">Semua rekaman diambil langsung dari mesin game (tanpa suara). Klik video untuk memutar atau menjeda.</p>
+  </div>
+  <div class="clips" id="clips"></div>
+</div></section>
+
+<!-- ============================================================ CERITA -->
+<section id="cerita"><div class="wrap">
+  <div class="reveal">
+    <div class="kicker">Alur cerita</div>
+    <h2>Tiga bab revolusi</h2>
+    <p class="lead">Setiap bab dibuka dan ditutup dengan film, lalu diselingi misi: bertahan, merebut wilayah, mengawal warga, menghancurkan sasaran. Tokoh utama dan rekan-rekannya fiktif; peristiwa, tempat, dan tokoh sejarah diceritakan ringkas.</p>
+  </div>
+  <div class="chapters">
+    <article class="chapter reveal">
+      <img src="media/shots/bab1.jpg" alt="Bab 1: Surabaya" loading="lazy">
+      <div class="in">
+        <span class="badge on">ADA DI DEMO</span>
+        <div class="no">BAB 1</div><h3>Arek-Arek Suroboyo</h3>
+        <div class="when">19 September – 10 November 1945 · Surabaya</div>
+        <p>Bendera Belanda berkibar di Hotel Yamato. Massa berkumpul, perundingan gagal, dan para pemuda merobek warna birunya. Lalu datang ultimatum Inggris, siaran Bung Tomo, dan gempuran 10 November.</p>
+        <ol><li>Tahan serbuan di alun-alun Hotel Yamato</li><li>Evakuasi warga Kampung Peneleh</li><li>Rebut Gedung Internatio</li><li>Ledakkan & tahan Jembatan Merah</li></ol>
+      </div>
+    </article>
+    <article class="chapter reveal">
+      <img src="media/shots/bab2.jpg" alt="Bab 2: Ambarawa" loading="lazy">
+      <div class="in">
+        <span class="badge off">VERSI LENGKAP</span>
+        <div class="no">BAB 2</div><h3>Palagan Ambarawa</h3>
+        <div class="when">12 – 15 Desember 1945 · Ambarawa</div>
+        <p>Kolonel Soedirman memimpin serangan "Supit Urang": pasukan TKR, laskar, dan rakyat mengepung kota dari segala arah sampai Sekutu mundur ke Semarang.</p>
+        <ol><li>Sergap patroli di persawahan</li><li>Rebut Stasiun Ambarawa</li><li>Lumpuhkan meriam di bukit</li><li>Kepung Benteng Willem I</li></ol>
+      </div>
+    </article>
+    <article class="chapter reveal">
+      <img src="media/shots/bab3.jpg" alt="Bab 3: Gerilya" loading="lazy">
+      <div class="in">
+        <span class="badge off">VERSI LENGKAP</span>
+        <div class="no">BAB 3</div><h3>Jalan Gerilya</h3>
+        <div class="when">19 Desember 1948 – 27 Desember 1949 · Hutan Jawa</div>
+        <p>Agresi Militer Belanda II. Yogyakarta jatuh, tetapi Panglima Besar Soedirman yang sakit parah memilih bergerilya. Kawal rombongannya menembus hutan.</p>
+        <ol><li>Kawal rombongan Panglima</li><li>Sergap patroli NICA</li><li>Putuskan jembatan & pos radio</li><li>Bertahan sampai rombongan lolos</li></ol>
+      </div>
+    </article>
+  </div>
+</div></section>
+
+<!-- ============================================================ FITUR -->
+<section id="fitur"><div class="wrap">
+  <div class="reveal">
+    <div class="kicker">Fitur</div>
+    <h2>Apa saja yang ada di dalamnya</h2>
+  </div>
+  <div class="grid">
+    <div class="card reveal"><div class="ic">🎬</div><h3>Sutradara adegan</h3><p>Film ditulis sebagai data: gerakan kamera (dolly, orbit, mengikuti tokoh), aktor yang berjalan, menembak, gugur, bergestur, ledakan, pesawat, selebaran jatuh. Tahan Spasi untuk melewati.</p></div>
+    <div class="card reveal"><div class="ic">🎙️</div><h3>Narasi & subtitle</h3><p>Setiap dialog tampil sebagai subtitle dan dibacakan dengan suara Bahasa Indonesia bawaan browser. Warna gambar sepia, atau hitam-putih bergaya arsip untuk kilas balik.</p></div>
+    <div class="card reveal"><div class="ic">🧑‍🌾</div><h3>Warga sipil hidup</h3><p>Warga berjalan-jalan, mengobrol, lari dan berlindung saat ada tembakan, berteriak minta tolong, dan bisa dikawal ke tempat aman. Menembak warga dikenai penalti.</p></div>
+    <div class="card reveal"><div class="ic">🎖️</div><h3>Kostum per faksi</h3><p>Pejuang, laskar bambu runcing, TKR, Sekutu (Inggris-India), NICA/KNIL, dan warga — masing-masing dengan seragam, tutup kepala, dan perlengkapan sendiri.</p></div>
+    <div class="card reveal"><div class="ic">🔫</div><h3>Senjata 1945</h3><p>Arisaka Type 99 dan Lee-Enfield dengan animasi kokang, Sten Mk II, Colt M1911. Musuh bersenapan kokang menembak jarang tapi mematikan.</p></div>
+    <div class="card reveal"><div class="ic">🗺️</div><h3>Peta bersejarah</h3><p>Surabaya 1945 (Kalimas, Hotel Yamato, pasar, kampung, pelabuhan & kapal perang) dan Ambarawa (desa, sawah, masjid bertumpang, stasiun, benteng, Rawa Pening).</p></div>
+    <div class="card reveal"><div class="ic">🛡️</div><h3>Taktik orang ketiga</h3><p>Jongkok, tiarap, menempel dan meluncur ke balik perlindungan, tembak buta, lompat menghindar, pindah bahu kamera, serta mode orang pertama.</p></div>
+    <div class="card reveal"><div class="ic">✈️</div><h3>Medan perang hidup</h3><p>Pesawat RAF melintas dan mengebom, sirene serangan udara, asap dan api kota yang terbakar, teriakan prajurit di tengah pertempuran.</p></div>
+    <div class="card reveal"><div class="ic">🧩</div><h3>Mode lain & editor</h3><p>Bertahan, Deathmatch, Tim Deathmatch, Battle Royale, multiplayer lewat tautan (P2P), dan Editor Skenario untuk membuat cerita & adegan film sendiri.</p></div>
+  </div>
+</div></section>
+
+<!-- ============================================================ GALERI -->
+<section id="galeri"><div class="wrap">
+  <div class="reveal">
+    <div class="kicker">Galeri</div>
+    <h2>Potongan gambar</h2>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</div></section>
+
+<!-- ============================================================ TEKNOLOGI -->
+<section id="teknologi"><div class="wrap">
+  <div class="reveal">
+    <div class="kicker">Teknologi & konsep</div>
+    <h2>Bagaimana game ini dibuat</h2>
+    <p class="lead">Seluruh game berjalan di browser tanpa plugin. Semua bangunan, senjata, dan suara dibuat oleh kode, jadi unduhan tetap kecil.</p>
+  </div>
+  <div class="arch reveal">
+    <div><b>Grafis 3D</b><small>three.js / WebGL: bayangan dinamis, kabut, langit shader, vegetasi instanced per chunk.</small></div>
+    <div><b>Dunia prosedural</b><small>Medan, sungai, jalan, gedung kolonial, kampung, masjid, benteng, rel & lokomotif dibangun dari kode, lalu digabung per bahan.</small></div>
+    <div><b>Animasi karakter</b><small>Kerangka Mixamo dua lapis (atas/bawah) + IK untuk memegang senjata, bidikan, gestur (hormat, kepal tangan, bambu runcing), dan tatapan.</small></div>
+    <div><b>Kostum lewat shader</b><small>Satu model karakter diwarnai ulang per bagian tubuh (baju, celana, sepatu, kulit), ditambah perlengkapan yang menempel ke tulang.</small></div>
+    <div><b>Sutradara film</b><small>Adegan berbentuk data JSON: shot kamera, aksi aktor, subtitle, dan efek. Pemain juga bisa membuat film sendiri di editor.</small></div>
+    <div><b>AI tempur & warga</b><small>Bot mencari perlindungan, jongkok atau tiarap, menembak beruntun atau sekali-sekali sesuai senjatanya; warga panik, berlindung, dan mengikuti pemain.</small></div>
+    <div><b>Audio sintetis</b><small>Tembakan, gema, ledakan, pesawat, sirene, kentongan, dan riuh massa dibuat dengan Web Audio; narasi dengan Web Speech.</small></div>
+    <div><b>Multiplayer</b><small>WebSocket ke server sendiri, atau P2P WebRTC (PeerJS) saat dihosting statis seperti di Vercel.</small></div>
+  </div>
+  <div class="note reveal">Demo di situs ini adalah <b>build yang sudah di-bundle & di-minify</b> (bukan kode sumber). Bab 1 bisa dimainkan penuh; Bab 2 dan 3 ada di versi lengkap. Penjelasan desain lengkap ada di <a href="https://github.com/Mrx112/Game_FPS/blob/main/KONSEP.md" target="_blank" rel="noopener">KONSEP.md</a>.</div>
+</div></section>
+
+<!-- ============================================================ KONTROL -->
+<section id="kontrol"><div class="wrap">
+  <div class="cols">
+    <div class="reveal">
+      <div class="kicker">Cara bermain</div>
+      <h2>Kontrol</h2>
+      <p class="lead">Mainkan di komputer (Chrome atau Edge terbaru), dengan keyboard dan mouse. Klik layar game untuk mengunci mouse.</p>
+      <div class="note">Di demo: menu → <b>KAMPANYE 1945</b> → <b>Bab 1</b>. Kalau terasa berat, pilih Grafis <b>Rendah</b> di menu utama.</div>
+    </div>
+    <table class="keys reveal">
+      <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td><td>Bergerak</td></tr>
+      <tr><td><kbd>Shift</kbd></td><td>Lari cepat</td></tr>
+      <tr><td><kbd>C</kbd> / <kbd>Z</kbd></td><td>Jongkok / tiarap</td></tr>
+      <tr><td><kbd>E</kbd></td><td>Berlindung di balik objek</td></tr>
+      <tr><td>Klik kiri / kanan</td><td>Tembak / bidik</td></tr>
+      <tr><td><kbd>R</kbd> · <kbd>G</kbd></td><td>Isi peluru · lempar granat</td></tr>
+      <tr><td><kbd>V</kbd></td><td>Lompat menghindar</td></tr>
+      <tr><td><kbd>F</kbd> · <kbd>Q</kbd></td><td>Orang pertama/ketiga · ganti bahu</td></tr>
+      <tr><td><kbd>1</kbd> <kbd>2</kbd></td><td>Senapan / pistol</td></tr>
+      <tr><td>Tahan <kbd>Spasi</kbd> · <kbd>Enter</kbd></td><td>Lewati film · adegan berikutnya</td></tr>
+    </table>
+  </div>
+</div></section>
+
+<!-- ============================================================ CATATAN -->
+<section id="catatan"><div class="wrap reveal">
+  <div class="kicker">Catatan sejarah</div>
+  <h2>Untuk mengenang, bukan menggurui</h2>
+  <p class="lead">Game ini dibuat untuk mengenalkan semangat perjuangan kemerdekaan dengan cara yang menarik bagi generasi sekarang. Peristiwa dan tokoh diceritakan ringkas dan disederhanakan agar bisa dimainkan; beberapa urutan dan tempat digabungkan. Untuk sejarah yang lengkap, silakan baca sumber-sumber sejarah resmi.</p>
+</div></section>
+
+<section class="final"><div class="wrap reveal">
+  <div class="kicker">Siap?</div>
+  <h2>Merdeka atau mati.</h2>
+  <div class="cta">
+    <a class="btn primary" href="play/">▶ Mainkan Demo Sekarang</a>
+    <a class="btn" href="https://github.com/Mrx112/Game_FPS/blob/main/KONSEP.md" target="_blank" rel="noopener">Baca Dokumen Konsep</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>Operasi Garuda · Merdeka atau Mati — demo & portofolio oleh <b>Mrx112</b></div>
+  <div>Dibuat dengan three.js · Model karakter & animasi: Meshy & Mixamo · Font: Google Fonts</div>
+</div></footer>
+
+<div class="lightbox" id="lightbox"><img alt=""></div>
+
+<script>
+// cuplikan video & galeri dibangkitkan dari daftar agar mudah ditambah
+const CLIPS = [
+  ['yamato', 'film', 'Insiden Hotel Yamato', 'Pemuda di puncak menara merobek warna biru bendera Belanda — tinggal merah dan putih.'],
+  ['bungtomo', 'film', 'Siaran Bung Tomo', 'Warga berkumpul di pos ronda mendengarkan siaran radio sebelum ultimatum berakhir.'],
+  ['gempur', 'film', '10 November, 06.00', 'Ultimatum ditolak. Meriam kapal perang dan pesawat Inggris mulai menggempur kota.'],
+  ['tempur', 'game', 'Menyerbu Jembatan Merah', 'Baku tembak dengan tentara Sekutu di tepi Kalimas memakai Arisaka rampasan.'],
+  ['evakuasi', 'game', 'Evakuasi warga', 'Warga Kampung Peneleh mengikuti pemain menuju Pos Palang Merah.'],
+  ['fps', 'game', 'Arisaka dari mata pemain', 'Mode orang pertama: bidik, tembak, lalu kokang senapan bolt-action.'],
+  ['bambu', 'film', 'Serbuan bambu runcing', 'Laskar rakyat menyerbu Gedung Internatio di bawah hujan peluru.'],
+  ['soedirman', 'film', 'Supit Urang', 'Kolonel Soedirman memberi perintah serangan serentak di Ambarawa (versi lengkap).'],
+  ['gerilya', 'film', 'Jalan gerilya', 'Rombongan Panglima Besar Soedirman menembus hutan (versi lengkap).'],
+];
+const SHOTS = [
+  ['yamato', 'Merah Putih di puncak Hotel Yamato'], ['massa', 'Laskar bambu runcing menyerbu'], ['bungtomo', 'Mendengarkan siaran radio Bung Tomo'],
+  ['gempur', 'Kota dibombardir pada 10 November'], ['tempur', 'Gameplay: baku tembak di Jembatan Merah'], ['sekutu', 'Tentara Sekutu berhelm Brodie'],
+  ['evakuasi', 'Gameplay: mengawal warga'], ['soedirman', 'Pasukan TKR memberi hormat'], ['gerilya', 'Panglima Besar dan pengawalnya'],
+  ['menu', 'Menu kampanye'], ['judul', 'Pembuka bergaya film arsip'], ['fps', 'Mode orang pertama'],
+];
+const $ = s => document.querySelector(s);
+$('#clips').innerHTML = CLIPS.map(([id, kind, t, d]) => `<div class="clip reveal">
+  <div class="frame"><video src="media/clips/${id}.mp4" poster="media/posters/${id}.jpg" muted loop playsinline preload="none"></video></div>
+  <div class="cap"><span class="tag ${kind === 'game' ? 'game' : ''}">${kind === 'game' ? 'GAMEPLAY' : 'FILM'}</span><h3>${t}</h3><p>${d}</p></div></div>`).join('');
+$('#gallery').innerHTML = SHOTS.map(([id, c]) => `<figure class="reveal"><img src="media/shots/${id}.jpg" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`).join('');
+for (const f of document.querySelectorAll('.clip .frame')) f.addEventListener('click', () => {
+  const v = f.querySelector('video');
+  if (v.paused) { v.play(); f.classList.add('playing'); } else { v.pause(); f.classList.remove('playing'); }
+});
+// putar otomatis saat terlihat, jeda saat keluar layar
+const vio = new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target, f = v.closest('.frame');
+  if (e.isIntersecting && (v.autoplay || f?.classList.contains('playing'))) v.play().catch(() => {});
+  else if (!e.isIntersecting) v.pause();
+}), { threshold: 0.35 });
+document.querySelectorAll('video').forEach(v => vio.observe(v));
+const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } }), { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => rio.observe(el));
+const lb = $('#lightbox');
+$('#gallery').addEventListener('click', e => { const im = e.target.closest('figure')?.querySelector('img'); if (!im) return; lb.querySelector('img').src = im.src; lb.classList.add('on'); });
+lb.addEventListener('click', () => lb.classList.remove('on'));
+</script>
+</body>
+</html>
